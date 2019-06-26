@@ -33,19 +33,9 @@
 
 function buddyforms_pods() {
 
-	global $pods;
 
 
 	$pods = pods_api()->load_pods( array( 'fields' => false ) );
-
-
-// Output a form with all fields
-// echo $mypod->form();
-// echo $mypod->form( $fields, 'Submit', '/thank-you-for-submitting/?new_id=X_ID_X' );
-
-
-//	$fields = $mypod->fields();
-
 
 	$form_fields = array();
 	foreach ( $pods as $key => $pod ) {
