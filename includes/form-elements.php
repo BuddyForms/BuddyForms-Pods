@@ -3,6 +3,7 @@
 /*
  * Add PODS form elementrs in the form elements select box
  */
+add_filter( 'buddyforms_add_form_element_select_option', 'buddyforms_pods_elements_to_select', 1, 2 );
 function buddyforms_pods_elements_to_select( $elements_select_options ) {
 	global $post;
 
@@ -22,13 +23,11 @@ function buddyforms_pods_elements_to_select( $elements_select_options ) {
 	return $elements_select_options;
 }
 
-add_filter( 'buddyforms_add_form_element_select_option', 'buddyforms_pods_elements_to_select', 1, 2 );
-
-
 /*
  * Create the new PODS Form Builder Form Elements
  *
  */
+add_filter( 'buddyforms_form_element_add_field', 'buddyforms_pods_form_builder_form_elements', 1, 5 );
 function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $field_type, $field_id ) {
 	global $field_position, $buddyforms;
 
@@ -106,12 +105,11 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 	return $form_fields;
 }
 
-add_filter( 'buddyforms_form_element_add_field', 'buddyforms_pods_form_builder_form_elements', 1, 5 );
-
 /*
  * Display the new PODS Fields in the frontend form
  *
  */
+add_filter( 'buddyforms_create_edit_form_display_element', 'buddyforms_pods_frontend_form_elements', 1, 2 );
 function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 	global $buddyforms, $nonce;
 
@@ -167,12 +165,11 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 	return $form;
 }
 
-add_filter( 'buddyforms_create_edit_form_display_element', 'buddyforms_pods_frontend_form_elements', 1, 2 );
-
 /*
  * Save PODS Fields
  *
  */
+add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
 function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 	if ( $customfield['type'] == 'pods-group' ) {
 
@@ -205,13 +202,9 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 	}
 }
 
-add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
 
-
-
-add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_members_formbuilder_fields_options', 10, 4 );
-
-function buddyforms_members_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
+add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 10, 4 );
+function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
 	global $buddyforms;
 
 
@@ -242,4 +235,33 @@ function buddyforms_members_formbuilder_fields_options( $form_fields, $field_typ
 	return $form_fields;
 }
 
+add_action( 'buddyforms_process_submission_end', 'buddyforms_pods_process_submission_end', 10, 1 );
+function buddyforms_pods_process_submission_end( $args ) {
+	global $buddyforms;
+
+	extract( $args );
+
+	if ( ! isset( $post_id ) ) {
+		return;
+	}
+
+	if ( isset( $buddyforms[ $form_slug ] ) ) {
+		if ( isset( $buddyforms[ $form_slug ]['form_fields'] ) ) {
+
+			foreach ( $buddyforms[ $form_slug ]['form_fields'] as $field_key => $field ) {
+
+				if ( isset( $field['mapped_xprofile_field'] ) && $field['mapped_xprofile_field'] != 'none' ) {
+
+					$pod = pods( $field['pods_group'], $post_id );
+
+					$data[ $field['pods_field'] ] = $_POST[ $field['pods_field'] ];
+					$pod->save( $data, null, $post_id );
+
+				}
+
+			}
+		}
+	}
+
+}
 
