@@ -176,8 +176,6 @@ add_filter( 'buddyforms_create_edit_form_display_element', 'buddyforms_pods_fron
 function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 	if ( $customfield['type'] == 'pods-group' ) {
 
-
-
 		$pods = pods_api()->load_pods( array( 'fields' => false ) );
 
 		$pod_form_fields = array();
@@ -189,16 +187,10 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 			}
 		}
 
-
-
-
 		$pod = pods( $customfield['pods_group'], $post_id );
-
-
 		foreach ($pod_form_fields[$customfield['pods_group']] as $kk => $field_name ){
 			$data[ $field_name ] = $_POST[ $field_name ];
 		}
-
 
 		$pod->save( $data, null, $post_id );
 
@@ -214,4 +206,40 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 }
 
 add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
+
+
+
+add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_members_formbuilder_fields_options', 10, 4 );
+
+function buddyforms_members_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
+	global $buddyforms;
+
+
+	$post_type = $buddyforms[$form_slug]['post_type'];
+
+	$pods = pods_api()->load_pods( array( 'fields' => false ) );
+
+	$pod_form_fields = array();
+	$pods_list       = array();
+	foreach ( $pods as $pod_key => $pod ) {
+		$pods_list[ $pod['id'] ] = $pod['name'];
+		foreach ( $pod['fields'] as $pod_fields_key => $field ) {
+			$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
+		}
+	}
+
+	if(isset($pod_form_fields[$post_type]))
+
+	$mapped_pods_field                             = isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] ) ? $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] : '';
+	$form_fields['PODS']['mapped_pods_field'] = new Element_Select( '<b>' . __( 'Map with existing Pods Field', 'buddyforms' ) . '</b>', "buddyforms_options[form_fields][" . $field_id . "][mapped_pods_field]", $pod_form_fields[$post_type], array(
+		'value'    => $mapped_pods_field,
+		'class'    => 'bf_tax_select',
+		'field_id' => $field_id,
+		'id'       => 'buddyforms_pods_' . $field_id,
+	) );
+
+
+	return $form_fields;
+}
+
 
