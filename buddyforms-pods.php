@@ -46,7 +46,6 @@ class BuddyFormsPODS {
 	public function __construct() {
 		add_action( 'init', array( $this, 'includes' ), 4, 1 );
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
-		add_action( 'buddyforms_admin_js_css_enqueue', array( $this, 'buddyforms_pods_admin_js' ) );
 		$this->load_constants();
 	}
 

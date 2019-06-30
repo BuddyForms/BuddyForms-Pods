@@ -62,7 +62,7 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'] ) ) {
 				$pods_field = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'];
 			}
-			$field_select                         = $pod_form_fields['devs'];
+			$field_select                         = $pod_form_fields[$pods_group];
 			$form_fields['general']['pods_field'] = new Element_Select( '', "buddyforms_options[form_fields][" . $field_id . "][pods_field]", $field_select, array(
 				'value' => $pods_field,
 				'class' => 'bf_pods_fields_select bf_pods_' . $field_id
