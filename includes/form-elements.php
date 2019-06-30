@@ -216,6 +216,9 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 	$pods_list       = array();
 	foreach ( $pods as $pod_key => $pod ) {
 		$pods_list[ $pod['id'] ] = $pod['name'];
+		$pod_form_fields[ $pod['name'] ][ 'none' ] = 'Select a field';
+
+
 		foreach ( $pod['fields'] as $pod_fields_key => $field ) {
 			$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
 		}
@@ -250,11 +253,10 @@ function buddyforms_pods_process_submission_end( $args ) {
 
 			foreach ( $buddyforms[ $form_slug ]['form_fields'] as $field_key => $field ) {
 
-				if ( isset( $field['mapped_xprofile_field'] ) && $field['mapped_xprofile_field'] != 'none' ) {
+				if ( isset( $field['mapped_pods_field'] ) && $field['mapped_pods_field'] != 'none' ) {
 
-					$pod = pods( $field['pods_group'], $post_id );
-
-					$data[ $field['pods_field'] ] = $_POST[ $field['pods_field'] ];
+					$pod = pods( $buddyforms[ $form_slug ]['post_type'], $post_id );
+					$data[ $field['mapped_pods_field'] ] = $_POST[ $field['slug'] ];
 					$pod->save( $data, null, $post_id );
 
 				}
