@@ -185,7 +185,7 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 		}
 
 		$pod = pods( $customfield['pods_group'], $post_id );
-		foreach ($pod_form_fields[$customfield['pods_group']] as $kk => $field_name ){
+		foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
 			$data[ $field_name ] = $_POST[ $field_name ];
 		}
 
@@ -208,7 +208,7 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 	global $buddyforms;
 
 
-	$post_type = $buddyforms[$form_slug]['post_type'];
+	$post_type = $buddyforms[ $form_slug ]['post_type'];
 
 	$pods = pods_api()->load_pods( array( 'fields' => false ) );
 
@@ -221,10 +221,10 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 		}
 	}
 
-	if(isset($pod_form_fields[$post_type]))
-
-	$mapped_pods_field                             = isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] ) ? $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] : '';
-	$form_fields['PODS']['mapped_pods_field'] = new Element_Select( '<b>' . __( 'Map with existing Pods Field', 'buddyforms' ) . '</b>', "buddyforms_options[form_fields][" . $field_id . "][mapped_pods_field]", $pod_form_fields[$post_type], array(
+	if ( isset( $pod_form_fields[ $post_type ] ) ) {
+		$mapped_pods_field = isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] ) ? $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['mapped_pods_field'] : '';
+	}
+	$form_fields['PODS']['mapped_pods_field'] = new Element_Select( '<b>' . __( 'Map with existing Pods Field', 'buddyforms' ) . '</b>', "buddyforms_options[form_fields][" . $field_id . "][mapped_pods_field]", $pod_form_fields[ $post_type ], array(
 		'value'    => $mapped_pods_field,
 		'class'    => 'bf_tax_select',
 		'field_id' => $field_id,

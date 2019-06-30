@@ -1,5 +1,5 @@
 === BuddyForms Pods ===
-Contributors: svenl77, themekraft, buddyforms
+Contributors: svenl77, gfirem, themekraft
 Tags: login form, login redirect, login page, custom login, login
 Requires at least: 4.9
 Tested up to: 5.2
