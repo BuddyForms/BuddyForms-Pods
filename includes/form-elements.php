@@ -140,7 +140,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 	switch ( $customfield['type'] ) {
 		case 'pods-field':
 
-			$mypod = pods( $customfield['pods_group'] );
+			$mypod = pods( $customfield['pods_group'], $post_id );
 			if ( ! count( $mypod->pod_data['fields'] ) > 0 ) {
 				break;
 			}
@@ -152,7 +152,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 			break;
 		case 'pods-group':
 
-			$mypod = pods( $customfield['pods_group'] );
+			$mypod = pods( $customfield['pods_group'], $post_id );
 			if ( ! count( $mypod->pod_data['fields'] ) > 0 ) {
 				break;
 			}
@@ -207,6 +207,9 @@ add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilde
 function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
 	global $buddyforms;
 
+	if ( $field_type == 'pods-group' || $field_type == 'pods-field') {
+		return $form_fields;
+	}
 
 	$post_type = $buddyforms[ $form_slug ]['post_type'];
 
