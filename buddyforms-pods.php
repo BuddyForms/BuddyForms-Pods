@@ -78,6 +78,7 @@ class BuddyFormsPODS {
 	 */
 	public function includes() {
 		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'form-elements.php';
+		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'functions.php';
 	}
 
 	/**
