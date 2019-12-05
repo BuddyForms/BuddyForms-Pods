@@ -8,8 +8,13 @@ function buddyforms_pods_elements_to_select( $elements_select_options ) {
 	global $post;
 
 	if ( $post->post_type != 'buddyforms' ) {
-		return;
+		return $elements_select_options;
 	}
+
+	if( ! defined('PODS_VERSION')){
+		return $elements_select_options;
+	}
+
 	$elements_select_options['pods']['label']                = 'PODS';
 	$elements_select_options['pods']['class']                = 'bf_show_if_f_type_post';
 	$elements_select_options['pods']['fields']['pods-field'] = array(
@@ -31,6 +36,9 @@ add_filter( 'buddyforms_form_element_add_field', 'buddyforms_pods_form_builder_f
 function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $field_type, $field_id ) {
 	global $field_position, $buddyforms;
 
+	if( ! defined('PODS_VERSION')){
+		return $form_fields;
+	}
 
 	$pods            = pods_api()->load_pods( array( 'fields' => false ) );
 	$pod_form_fields = array();
@@ -58,7 +66,7 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 				'data-field_id' => $field_id
 			) );
 
-			$pods_field = 'false';
+			$pods_field = 'not-set';
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'] ) ) {
 				$pods_field = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'];
 			}
@@ -69,12 +77,12 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 			) );
 
 			$name = 'PODS-Field';
-			if ( $pods_field && $pods_field != 'false' ) {
+			if ( $pods_field && $pods_field != 'not-set' ) {
 				$name = 'PODS Field: ' . $pods_field;
 			}
 			$form_fields['general']['name'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][name]", $name );
 
-			$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", 'pods_field_key' );
+			$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", $pods_field );
 			$form_fields['general']['type']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][type]", $field_type );
 			$form_fields['general']['order'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][order]", $field_position, array( 'id' => 'buddyforms/' . $form_slug . '/form_fields/' . $field_id . '/order' ) );
 			break;
@@ -83,19 +91,19 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 			unset( $form_fields );
 
 
-			$pods_group = 'false';
+			$pods_group = 'not-set';
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_group'] ) ) {
 				$pods_group = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_group'];
 			}
 			$form_fields['general']['pods_group'] = new Element_Select( '', "buddyforms_options[form_fields][" . $field_id . "][pods_group]", $pods_list, array( 'value' => $pods_group ) );
 
 			$name = 'PODS-Group';
-			if ( $pods_group != 'false' ) {
+			if ( $pods_group != 'not-set' ) {
 				$name = ' PODS Group: ' . $pods_group;
 			}
 			$form_fields['general']['name'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][name]", $name );
 
-			$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", 'pods-fields-group' );
+			$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", $pods_group );
 			$form_fields['general']['type']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][type]", $field_type );
 			$form_fields['general']['order'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][order]", $field_position, array( 'id' => 'buddyforms/' . $form_slug . '/form_fields/' . $field_id . '/order' ) );
 			break;
@@ -125,6 +133,9 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 		return $form;
 	}
 
+	if( ! defined('PODS_VERSION')){
+		return $form_fields;
+	}
 
 	$pods = pods_api()->load_pods( array( 'fields' => false ) );
 
@@ -173,6 +184,10 @@ add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 1
 function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 	if ( $customfield['type'] == 'pods-group' ) {
 
+		if( ! defined('PODS_VERSION')){
+			return;
+		}
+
 		$pods = pods_api()->load_pods( array( 'fields' => false ) );
 
 		$pod_form_fields = array();
@@ -211,6 +226,10 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 		return $form_fields;
 	}
 
+	if( ! defined('PODS_VERSION')){
+		return $form_fields;
+	}
+
 	$post_type = $buddyforms[ $form_slug ]['post_type'];
 
 	$pods = pods_api()->load_pods( array( 'fields' => false ) );
@@ -225,6 +244,10 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 		foreach ( $pod['fields'] as $pod_fields_key => $field ) {
 			$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
 		}
+	}
+
+	if( ! isset($pod_form_fields[ $post_type ])){
+		return $form_fields;
 	}
 
 	if ( isset( $pod_form_fields[ $post_type ] ) ) {

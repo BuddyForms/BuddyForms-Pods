@@ -93,4 +93,96 @@ class BuddyFormsPODS {
 
 }
 
-$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
+
+
+if ( ! function_exists( 'buddyforms_pods_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function buddyforms_pods_fs() {
+		global $buddyforms_pods_fs;
+
+		if ( ! isset( $buddyforms_pods_fs ) ) {
+			// Include Freemius SDK.
+			if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php' ) ) {
+				// Try to load SDK from parent plugin folder.
+				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php';
+			} else if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php' ) ) {
+				// Try to load SDK from premium parent plugin folder.
+				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php';
+			}
+
+			$buddyforms_pods_fs = fs_dynamic_init( array(
+				'id'                  => '4706',
+				'slug'                => 'bf-pods',
+				'type'                => 'plugin',
+				'public_key'          => 'pk_5ffd22ecf0de8130b49fc380bf260',
+				'is_premium'          => true,
+				'is_premium_only'     => true,
+				'has_paid_plans'      => true,
+				'is_org_compliant'    => false,
+				'parent'              => array(
+					'id'         => '391',
+					'slug'       => 'buddyforms',
+					'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
+					'name'       => 'BuddyForms',
+				),
+				'menu'                => array(
+					'first-path'     => 'plugins.php',
+					'support'        => false,
+				)
+			) );
+		}
+
+		return $buddyforms_pods_fs;
+	}
+}
+
+function buddyforms_pods_fs_is_parent_active_and_loaded() {
+	// Check if the parent's init SDK method exists.
+	return function_exists( 'buddyforms_core_fs' );
+}
+
+function buddyforms_pods_fs_is_parent_active() {
+	$active_plugins = get_option( 'active_plugins', array() );
+
+	if ( is_multisite() ) {
+		$network_active_plugins = get_site_option( 'active_sitewide_plugins', array() );
+		$active_plugins         = array_merge( $active_plugins, array_keys( $network_active_plugins ) );
+	}
+
+	foreach ( $active_plugins as $basename ) {
+		if ( 0 === strpos( $basename, 'buddyforms/' ) ||
+		     0 === strpos( $basename, 'buddyforms-premium/' )
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function buddyforms_pods_fs_init() {
+	if ( buddyforms_pods_fs_is_parent_active_and_loaded() ) {
+		// Init Freemius.
+		buddyforms_pods_fs();
+
+
+		// Signal that the add-on's SDK was initiated.
+		do_action( 'buddyforms_pods_fs_loaded' );
+
+		$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
+
+	} else {
+		// Parent is inactive, add your error handling here.
+	}
+}
+
+if ( buddyforms_pods_fs_is_parent_active_and_loaded() ) {
+	// If parent already included, init add-on.
+	buddyforms_pods_fs_init();
+} else if ( buddyforms_pods_fs_is_parent_active() ) {
+	// Init add-on only after the parent is loaded.
+	add_action( 'buddyforms_core_fs_loaded', 'buddyforms_pods_fs_init' );
+} else {
+	// Even though the parent is not activated, execute add-on for activation / uninstall hooks.
+	buddyforms_pods_fs_init();
+}
