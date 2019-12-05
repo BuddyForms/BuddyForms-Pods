@@ -77,7 +77,7 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 			) );
 
 			$name = 'PODS-Field';
-			if ( $pods_field && $pods_field != 'not-set' ) {
+			if ( $pods_field != 'not-set' ) {
 				$name = 'PODS Field: ' . $pods_field;
 			}
 			$form_fields['general']['name'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][name]", $name );
