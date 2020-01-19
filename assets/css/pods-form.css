@@ -16,3 +16,29 @@ ul.pods-form-fields.pods-dependency {
 .pods-form-ui-row-type-pick .pods-form-ui-field select {
     width: 100% !important;
 }
+
+.the_buddyforms_form ul.pods-form-fields.pods-dependency {
+
+    font-weight: normal;
+
+}
+
+.description {
+    display: block;
+    font-size: 80%;
+    font-style: italic;
+    font-weight: normal;
+}
+.the_buddyforms_form .buddyforms-posts label {
+    font-weight: bold;
+}
+
+abbr, abbr[title],  acronym {
+    border-bottom: 0px;
+    cursor: default;
+    text-decoration: none;
+}
+
+.required {
+    color: #B94A48;
+}
