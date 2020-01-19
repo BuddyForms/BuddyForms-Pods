@@ -1,20 +1,10 @@
 <?php
 
-add_action( 'buddyforms_front_js_css_after_enqueue', 'buddyforms_pods_form_css' );
-
 /**
- *
+ * Include assets after buddyforms
  */
-function buddyforms_pods_form_css(){
-
-	?>
-	<style>
-		ul.pods-form-fields.pods-dependency {
-		list-style-type: none;
-		margin-right: 10px;
-		font-weight: bold;
-		font-style: normal;
-	</style>
-
-<?php
+function buddyforms_pods_include_assets() {
+	wp_enqueue_style( 'buddyforms_pods_css', BUDDYFORMS_PODS_ASSETS_URL . "css/pods-form.css" );
 }
+
+add_action( 'buddyforms_front_js_css_after_enqueue', 'buddyforms_pods_include_assets');

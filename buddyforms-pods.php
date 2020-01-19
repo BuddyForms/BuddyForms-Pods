@@ -69,6 +69,9 @@ class BuddyFormsPODS {
 		if ( ! defined( 'BUDDYFORMS_PODS_INCLUDES_PATH' ) ) {
 			define( 'BUDDYFORMS_PODS_INCLUDES_PATH', BUDDYFORMS_PODS_INSTALL_PATH . 'includes/' );
 		}
+		if ( ! defined( 'BUDDYFORMS_PODS_ASSETS_URL' ) ) {
+			define( 'BUDDYFORMS_PODS_ASSETS_URL', BUDDYFORMS_PODS_PLUGIN_URL . 'assets/' );
+		}
 
 	}
 
