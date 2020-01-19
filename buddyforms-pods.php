@@ -35,7 +35,9 @@ class BuddyFormsPODS {
 	/**
 	 * @var string
 	 */
-	public $version = '1.0.0';
+	public static $version = '1.0.0';
+	public static $include_assets = false;
+	public static $slug = 'buddyforms-pods';
 
 	/**
 	 * Initiate the class
@@ -70,6 +72,26 @@ class BuddyFormsPODS {
 
 	}
 
+	public static function error_log( $message ) {
+		if ( ! empty( $message ) ) {
+			error_log( self::getSlug() . ' -- ' . $message );
+		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function getNeedAssets() {
+		return self::$include_assets;
+	}
+
+	/**
+	 * @param string $include_assets
+	 */
+	public static function setNeedAssets( $include_assets ) {
+		self::$include_assets = $include_assets;
+	}
+
 	/**
 	 * Include files needed by BuddyForms
 	 *
@@ -88,11 +110,27 @@ class BuddyFormsPODS {
 	 * @since 1.0
 	 */
 	public function load_plugin_textdomain() {
-		load_plugin_textdomain( 'buddyforms', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain( 'buddyforms-pods', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 	}
 
-}
+	/**
+	 * Get plugin version
+	 *
+	 * @return string
+	 */
+	static function getVersion() {
+		return self::$version;
+	}
 
+	/**
+	 * Get plugins slug
+	 *
+	 * @return string
+	 */
+	static function getSlug() {
+		return self::$slug;
+	}
+}
 
 
 if ( ! function_exists( 'buddyforms_pods_fs' ) ) {
@@ -105,31 +143,35 @@ if ( ! function_exists( 'buddyforms_pods_fs' ) ) {
 			if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php' ) ) {
 				// Try to load SDK from parent plugin folder.
 				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php';
-			} else if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php' ) ) {
+			} elseif ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php' ) ) {
 				// Try to load SDK from premium parent plugin folder.
 				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php';
 			}
 
-			$buddyforms_pods_fs = fs_dynamic_init( array(
-				'id'                  => '4706',
-				'slug'                => 'bf-pods',
-				'type'                => 'plugin',
-				'public_key'          => 'pk_5ffd22ecf0de8130b49fc380bf260',
-				'is_premium'          => true,
-				'is_premium_only'     => true,
-				'has_paid_plans'      => true,
-				'is_org_compliant'    => false,
-				'parent'              => array(
-					'id'         => '391',
-					'slug'       => 'buddyforms',
-					'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
-					'name'       => 'BuddyForms',
-				),
-				'menu'                => array(
-					'first-path'     => 'plugins.php',
-					'support'        => false,
-				)
-			) );
+			try {
+				$buddyforms_pods_fs = fs_dynamic_init( array(
+					'id'               => '4706',
+					'slug'             => 'bf-pods',
+					'type'             => 'plugin',
+					'public_key'       => 'pk_5ffd22ecf0de8130b49fc380bf260',
+					'is_premium'       => true,
+					'is_premium_only'  => true,
+					'has_paid_plans'   => true,
+					'is_org_compliant' => false,
+					'parent'           => array(
+						'id'         => '391',
+						'slug'       => 'buddyforms',
+						'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
+						'name'       => 'BuddyForms',
+					),
+					'menu'             => array(
+						'first-path' => 'plugins.php',
+						'support'    => false,
+					)
+				) );
+			} catch ( Freemius_Exception $e ) {
+				return false;
+			}
 		}
 
 		return $buddyforms_pods_fs;
@@ -171,15 +213,13 @@ function buddyforms_pods_fs_init() {
 
 		$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
 
-	} else {
-		// Parent is inactive, add your error handling here.
 	}
 }
 
 if ( buddyforms_pods_fs_is_parent_active_and_loaded() ) {
 	// If parent already included, init add-on.
 	buddyforms_pods_fs_init();
-} else if ( buddyforms_pods_fs_is_parent_active() ) {
+} elseif ( buddyforms_pods_fs_is_parent_active() ) {
 	// Init add-on only after the parent is loaded.
 	add_action( 'buddyforms_core_fs_loaded', 'buddyforms_pods_fs_init' );
 } else {
