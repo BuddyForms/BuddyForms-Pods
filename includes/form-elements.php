@@ -148,6 +148,10 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 		}
 	}
 
+	$script_out = sprintf( '<script type="text/javascript"> if ( "undefined" === typeof ajaxurl ) { ajaxurl = "%s"; } </script>', pods_slash( admin_url( 'admin-ajax.php' ) ) );
+
+	$form->addElement( new Element_HTML( $script_out ) );
+
 	switch ( $customfield['type'] ) {
 		case 'pods-field':
 
