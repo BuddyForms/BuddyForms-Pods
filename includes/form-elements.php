@@ -162,10 +162,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 
 			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
 
-			$temp = $mypod->form( $params );
-			$temp = str_replace( '<input', '<input data-something required="required"', $temp );
-
-			$form->addElement( new Element_HTML( $temp ) );
+			$form->addElement( new Element_HTML( $mypod->form( $params ) ) );
 
 			break;
 		case 'pods-group':
@@ -177,15 +174,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 
 			$params = array( 'fields_only' => true, 'fields' => $pod_form_fields[ $customfield['pods_group'] ] );
 
-			$temp = $mypod->form( $params );
-			$temp = str_replace( '<input', '<input data-field_slug="' . $customfield['type'] . '" required="1" data-rule-minlength="[0]" field_id="' . $customfield['field_id'] . '" data-form="' . $form_slug  . '" class="settings-input form-control "', $temp );
-
-
-//			$temp = str_replace( 'class="', 'class="settings-input form-control ', $temp );
-
-			$temp = str_replace( '<p ', '<div class="bf-input"></div><p ', $temp );
-
-			$form->addElement( new Element_HTML( $temp ) );
+			$form->addElement( new Element_HTML( $mypod->form( $params ) ) );
 			break;
 	}
 
