@@ -11,7 +11,7 @@ function buddyforms_pods_elements_to_select( $elements_select_options ) {
 		return $elements_select_options;
 	}
 
-	if( ! defined('PODS_VERSION')){
+	if ( ! defined( 'PODS_VERSION' ) ) {
 		return $elements_select_options;
 	}
 
@@ -36,7 +36,7 @@ add_filter( 'buddyforms_form_element_add_field', 'buddyforms_pods_form_builder_f
 function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $field_type, $field_id ) {
 	global $field_position, $buddyforms;
 
-	if( ! defined('PODS_VERSION')){
+	if ( ! defined( 'PODS_VERSION' ) ) {
 		return $form_fields;
 	}
 
@@ -70,7 +70,7 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'] ) ) {
 				$pods_field = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'];
 			}
-			$field_select                         = $pod_form_fields[$pods_group];
+			$field_select                         = $pod_form_fields[ $pods_group ];
 			$form_fields['general']['pods_field'] = new Element_Select( '', "buddyforms_options[form_fields][" . $field_id . "][pods_field]", $field_select, array(
 				'value' => $pods_field,
 				'class' => 'bf_pods_fields_select bf_pods_' . $field_id
@@ -113,6 +113,11 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 	return $form_fields;
 }
 
+add_filter( 'buddyforms_forms_classes', 'buddyforms_acf_form_classes', 99, 3 );
+function buddyforms_acf_form_classes( $classes, $instance, $form_slug ) {
+	return 'pods-submittable ' . $classes;
+}
+
 /*
  * Display the new PODS Fields in the frontend form
  *
@@ -133,7 +138,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 		return $form;
 	}
 
-	if( ! defined('PODS_VERSION')){
+	if ( ! defined( 'PODS_VERSION' ) ) {
 		return $form_fields;
 	}
 
@@ -148,33 +153,51 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 		}
 	}
 
-	$script_out = sprintf( '<script type="text/javascript"> if ( "undefined" === typeof ajaxurl ) { ajaxurl = "%s"; } </script>', pods_slash( admin_url( 'admin-ajax.php' ) ) );
+	$pods_initial_script = "<script type=\"text/javascript\">if ('undefined' === typeof pods_form_init) {var pods_form_init = true;  document.addEventListener('DOMContentLoaded', function () { if ('undefined' !== typeof jQuery(document).Pods) { if ('undefined' === typeof ajaxurl) {  window.ajaxurl = '" . pods_slash( admin_url( 'admin-ajax.php' ) ) . "';  jQuery(document).Pods('dependency', true); } } }, false); }</script>";
 
-	$form->addElement( new Element_HTML( $script_out ) );
+	$form->addElement( new Element_HTML( $pods_initial_script ) );
 
 	switch ( $customfield['type'] ) {
 		case 'pods-field':
-
-			$mypod = pods( $customfield['pods_group'], $post_id );
+			$pod_target = $customfield['pods_group'];
+			if ( empty( $pod_target ) ) {
+				return $form;
+			}
+			$mypod = pods( $pod_target, $post_id );
 			if ( ! count( $mypod->pod_data['fields'] ) > 0 ) {
 				break;
 			}
 
 			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
 
-			$form->addElement( new Element_HTML( $mypod->form( $params ) ) );
-
+			$output_field = $mypod->form( $params );
+			//Add wrapper class
+			$output_field = str_replace( '<ul class="pods-form-fields', '<ul class="pods-form-fields bf_field_group ', $output_field );
+			$search       = sprintf( 'name="%s"', $field['name'] );
+			//Add attribute data-form
+			$output_field = str_replace( $search, $search . sprintf( ' data-form="%s" data-pod-target="%s"', $form_slug, $pod_target ), $output_field );
+			$form->addElement( new Element_HTML( $output_field ) );
 			break;
 		case 'pods-group':
-
-			$mypod = pods( $customfield['pods_group'], $post_id );
+			$pod_target = $customfield['pods_group'];
+			if ( empty( $pod_target ) ) {
+				return $form;
+			}
+			$mypod = pods( $pod_target, $post_id );
 			if ( ! count( $mypod->pod_data['fields'] ) > 0 ) {
 				break;
 			}
 
-			$params = array( 'fields_only' => true, 'fields' => $pod_form_fields[ $customfield['pods_group'] ] );
-
-			$form->addElement( new Element_HTML( $mypod->form( $params ) ) );
+			foreach ( $mypod->fields as $field_id => $field ) {
+				$params       = array( 'fields_only' => true, 'fields' => array( $field_id => $field ) );
+				$output_field = $mypod->form( $params );
+				//Add wrapper class
+				$output_field = str_replace( '<ul class="pods-form-fields', '<ul class="pods-form-fields bf_field_group ', $output_field );
+				$search       = sprintf( 'name="%s"', $field['name'] );
+				//Add attribute data-form
+				$output_field = str_replace( $search, $search . sprintf( ' data-form="%s" data-pod-target="%s"', $form_slug, $pod_target ), $output_field );
+				$form->addElement( new Element_HTML( $output_field ) );
+			}
 			break;
 	}
 
@@ -187,38 +210,43 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
  */
 add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
 function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
-	if ( $customfield['type'] == 'pods-group' ) {
+	try {
+		if ( $customfield['type'] == 'pods-group' ) {
 
-		if( ! defined('PODS_VERSION')){
-			return;
-		}
-
-		$pods = pods_api()->load_pods( array( 'fields' => false ) );
-
-		$pod_form_fields = array();
-		$pods_list       = array();
-		foreach ( $pods as $pod_key => $pod ) {
-			$pods_list[ $pod['id'] ] = $pod['name'];
-			foreach ( $pod['fields'] as $pod_fields_key => $field ) {
-				$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
+			if ( ! defined( 'PODS_VERSION' ) ) {
+				return;
 			}
+
+			$pods = pods_api()->load_pods( array( 'fields' => false ) );
+
+			$pod_form_fields = array();
+			$pods_list       = array();
+			foreach ( $pods as $pod_key => $pod ) {
+				$pods_list[ $pod['id'] ] = $pod['name'];
+				foreach ( $pod['fields'] as $pod_fields_key => $field ) {
+					$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
+				}
+			}
+
+			$pod = pods( $customfield['pods_group'], $post_id );
+			foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
+				if ( isset( $_POST[ $field_name ] ) ) {
+					$data[ $field_name ] = sanitize_text_field( $_POST[ $field_name ] );
+				}
+			}
+
+			$pod->save( $data, null, $post_id );
 		}
 
-		$pod = pods( $customfield['pods_group'], $post_id );
-		foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
-			$data[ $field_name ] = $_POST[ $field_name ];
+		if ( $customfield['type'] == 'pods-field' ) {
+
+			$pod = pods( $customfield['pods_group'], $post_id );
+
+			$data[ $customfield['pods_field'] ] = $_POST[ $customfield['pods_field'] ];
+			$pod->save( $data, null, $post_id );
 		}
-
-		$pod->save( $data, null, $post_id );
-
-	}
-
-	if ( $customfield['type'] == 'pods-field' ) {
-
-		$pod = pods( $customfield['pods_group'], $post_id );
-
-		$data[ $customfield['pods_field'] ] = $_POST[ $customfield['pods_field'] ];
-		$pod->save( $data, null, $post_id );
+	} catch ( Exception $ex ) {
+		$t = 'as';
 	}
 }
 
@@ -227,11 +255,11 @@ add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilde
 function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
 	global $buddyforms;
 
-	if ( $field_type == 'pods-group' || $field_type == 'pods-field') {
+	if ( $field_type == 'pods-group' || $field_type == 'pods-field' ) {
 		return $form_fields;
 	}
 
-	if( ! defined('PODS_VERSION')){
+	if ( ! defined( 'PODS_VERSION' ) ) {
 		return $form_fields;
 	}
 
@@ -242,8 +270,8 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 	$pod_form_fields = array();
 	$pods_list       = array();
 	foreach ( $pods as $pod_key => $pod ) {
-		$pods_list[ $pod['id'] ] = $pod['name'];
-		$pod_form_fields[ $pod['name'] ][ 'none' ] = 'Select a field';
+		$pods_list[ $pod['id'] ]                 = $pod['name'];
+		$pod_form_fields[ $pod['name'] ]['none'] = 'Select a field';
 
 
 		foreach ( $pod['fields'] as $pod_fields_key => $field ) {
@@ -251,7 +279,7 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 		}
 	}
 
-	if( ! isset($pod_form_fields[ $post_type ])){
+	if ( ! isset( $pod_form_fields[ $post_type ] ) ) {
 		return $form_fields;
 	}
 
@@ -286,7 +314,7 @@ function buddyforms_pods_process_submission_end( $args ) {
 
 				if ( isset( $field['mapped_pods_field'] ) && $field['mapped_pods_field'] != 'none' ) {
 
-					$pod = pods( $buddyforms[ $form_slug ]['post_type'], $post_id );
+					$pod                                 = pods( $buddyforms[ $form_slug ]['post_type'], $post_id );
 					$data[ $field['mapped_pods_field'] ] = $_POST[ $field['slug'] ];
 					$pod->save( $data, null, $post_id );
 

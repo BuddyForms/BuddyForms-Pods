@@ -42,3 +42,18 @@ abbr, abbr[title],  acronym {
 .required {
     color: #B94A48;
 }
+
+.the_buddyforms_form form .pods-validate-error-message{
+	color: red;
+	margin-right: 10px;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.bf_field_group .wp-editor-container.error{
+	border-color: red;
+}
+
+.bf_field_group label.error{
+	color: red;
+}
