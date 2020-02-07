@@ -46,6 +46,7 @@ class BuddyFormsPODS {
 	 * @since 0.1
 	 */
 	public function __construct() {
+
 		add_action( 'init', array( $this, 'includes' ), 4, 1 );
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
 		$this->load_constants();
@@ -102,6 +103,12 @@ class BuddyFormsPODS {
 	 * @since 1.0
 	 */
 	public function includes() {
+
+
+		if( ! defined( 'PODS_VERSION' )){
+			return;
+		}
+
 		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'form-elements.php';
 		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'bfPodsAPI.php';
 		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'functions.php';
@@ -216,6 +223,7 @@ function buddyforms_pods_fs_init() {
 		do_action( 'buddyforms_pods_fs_loaded' );
 
 		$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
+
 
 	}
 }

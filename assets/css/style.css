@@ -3,6 +3,7 @@ ul.pods-form-fields.pods-dependency {
     margin-right: 10px;
     font-weight: bold;
     font-style: normal;
+    padding: 0 !important;
 }
 
 .pods-field-input input {

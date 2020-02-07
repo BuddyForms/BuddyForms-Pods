@@ -251,7 +251,7 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 }
 
 
-add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 10, 4 );
+add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 999, 4 );
 function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
 	global $buddyforms;
 
