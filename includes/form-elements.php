@@ -113,11 +113,6 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 	return $form_fields;
 }
 
-add_filter( 'buddyforms_forms_classes', 'buddyforms_acf_form_classes', 99, 3 );
-function buddyforms_acf_form_classes( $classes, $instance, $form_slug ) {
-	return 'pods-submittable ' . $classes;
-}
-
 /*
  * Display the new PODS Fields in the frontend form
  *
@@ -204,54 +199,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 	return $form;
 }
 
-/*
- * Save PODS Fields
- *
- */
-add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
-function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
-	try {
-		if ( $customfield['type'] == 'pods-group' ) {
-
-			if ( ! defined( 'PODS_VERSION' ) ) {
-				return;
-			}
-
-			$pods = pods_api()->load_pods( array( 'fields' => false ) );
-
-			$pod_form_fields = array();
-			$pods_list       = array();
-			foreach ( $pods as $pod_key => $pod ) {
-				$pods_list[ $pod['id'] ] = $pod['name'];
-				foreach ( $pod['fields'] as $pod_fields_key => $field ) {
-					$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
-				}
-			}
-
-			$pod = pods( $customfield['pods_group'], $post_id );
-			foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
-				if ( isset( $_POST[ $field_name ] ) ) {
-					$data[ $field_name ] = sanitize_text_field( $_POST[ $field_name ] );
-				}
-			}
-
-			$pod->save( $data, null, $post_id );
-		}
-
-		if ( $customfield['type'] == 'pods-field' ) {
-
-			$pod = pods( $customfield['pods_group'], $post_id );
-
-			$data[ $customfield['pods_field'] ] = $_POST[ $customfield['pods_field'] ];
-			$pod->save( $data, null, $post_id );
-		}
-	} catch ( Exception $ex ) {
-		$t = 'as';
-	}
-}
-
-
-add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 10, 4 );
+add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 999, 4 );
 function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, $field_id, $form_slug = '' ) {
 	global $buddyforms;
 
@@ -295,34 +243,5 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 
 
 	return $form_fields;
-}
-
-add_action( 'buddyforms_process_submission_end', 'buddyforms_pods_process_submission_end', 10, 1 );
-function buddyforms_pods_process_submission_end( $args ) {
-	global $buddyforms;
-
-	extract( $args );
-
-	if ( ! isset( $post_id ) ) {
-		return;
-	}
-
-	if ( isset( $buddyforms[ $form_slug ] ) ) {
-		if ( isset( $buddyforms[ $form_slug ]['form_fields'] ) ) {
-
-			foreach ( $buddyforms[ $form_slug ]['form_fields'] as $field_key => $field ) {
-
-				if ( isset( $field['mapped_pods_field'] ) && $field['mapped_pods_field'] != 'none' ) {
-
-					$pod                                 = pods( $buddyforms[ $form_slug ]['post_type'], $post_id );
-					$data[ $field['mapped_pods_field'] ] = $_POST[ $field['slug'] ];
-					$pod->save( $data, null, $post_id );
-
-				}
-
-			}
-		}
-	}
-
 }
 
