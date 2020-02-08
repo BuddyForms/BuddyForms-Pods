@@ -102,7 +102,6 @@ function buddyforms_pods_server_validation( $valid, $form_slug ) {
 
 	if ( isset( $form['form_fields'] ) ) {
 		$internal_result = array();
-		$global_error    = ErrorHandler::get_instance();
 		foreach ( $form['form_fields'] as $key => $form_field ) {
 			if ( $form_field['type'] === 'pods-group' || $form_field['type'] === 'pods-field' ) {
 				if ( ! empty( $form_field['pods_group'] ) ) {
@@ -113,22 +112,18 @@ function buddyforms_pods_server_validation( $valid, $form_slug ) {
 						$pod_fields = $pod->fields;
 						foreach ( $pod->fields as $field_id => $pod_field ) {
 							$field_name        = $pod_field['name'];
-							$field_label       = $pod_field['label'];
 							$field_data        = isset( $_POST[ $field_name ] ) ? $_POST[ $field_name ] : '';
 							$pod_field         = $pod_fields[ $field_name ];
 							$is_valid          = $pods_api->handle_field_validation( $field_data, $field_name, $pod_field, $pod_fields, $pod, array( 'form_slug' => $form_slug ) );
 							$internal_result[] = $is_valid;
-							if ( empty( $is_valid ) ) {
-//								$global_error->add_error( new BuddyForms_Error( 'buddyforms_form_' . $form_slug, sprintf( __( '%s has an error', 'pods' ), $field_label ), $field_name ) );
-							}
 						}
 					}
+					bfPodsAPI::destroy_instance( $form_field['pods_group'] );
 				}
 			}
 		}
 		if ( ! empty( $internal_result ) ) {
-			$internal_result = array_unique( $internal_result );
-			$valid           = array_key_exists( 'true', array_keys( $internal_result ) );
+			$valid = ! in_array( false, $internal_result );
 		}
 	}
 
@@ -136,3 +131,86 @@ function buddyforms_pods_server_validation( $valid, $form_slug ) {
 }
 
 add_filter( 'buddyforms_form_custom_validation', 'buddyforms_pods_server_validation', 2, 2 );
+
+/*
+ * Save PODS Fields
+ *
+ */
+function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
+	try {
+		if ( $customfield['type'] == 'pods-group' ) {
+
+			if ( ! defined( 'PODS_VERSION' ) ) {
+				return;
+			}
+
+			$pods = pods_api()->load_pods( array( 'fields' => false ) );
+
+			$pod_form_fields = array();
+			$pods_list       = array();
+			foreach ( $pods as $pod_key => $pod ) {
+				$pods_list[ $pod['id'] ] = $pod['name'];
+				foreach ( $pod['fields'] as $pod_fields_key => $field ) {
+					$pod_form_fields[ $pod['name'] ][ $pod_fields_key ] = $field['name'];
+				}
+			}
+
+			$pod = pods( $customfield['pods_group'], $post_id );
+			foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
+				if ( isset( $_POST[ $field_name ] ) ) {
+					$data[ $field_name ] = sanitize_text_field( $_POST[ $field_name ] );
+				}
+			}
+
+			$pod->save( $data, null, $post_id );
+		}
+
+		if ( $customfield['type'] == 'pods-field' ) {
+
+			$pod = pods( $customfield['pods_group'], $post_id );
+
+			$data[ $customfield['pods_field'] ] = $_POST[ $customfield['pods_field'] ];
+			$pod->save( $data, null, $post_id );
+		}
+	} catch ( Exception $ex ) {
+		error_log( 'BuddyFormsPods::' . $ex->getMessage() );
+	}
+}
+
+add_action( 'buddyforms_update_post_meta', 'buddyforms_pods_update_post_meta', 10, 2 );
+
+
+function buddyforms_pods_process_submission_end( $args ) {
+	global $buddyforms;
+
+	extract( $args );
+
+	if ( ! isset( $post_id ) ) {
+		return;
+	}
+
+	if ( isset( $buddyforms[ $form_slug ] ) ) {
+		if ( isset( $buddyforms[ $form_slug ]['form_fields'] ) ) {
+
+			foreach ( $buddyforms[ $form_slug ]['form_fields'] as $field_key => $field ) {
+
+				if ( isset( $field['mapped_pods_field'] ) && $field['mapped_pods_field'] != 'none' ) {
+
+					$pod                                 = pods( $buddyforms[ $form_slug ]['post_type'], $post_id );
+					$data[ $field['mapped_pods_field'] ] = $_POST[ $field['slug'] ];
+					$pod->save( $data, null, $post_id );
+
+				}
+
+			}
+		}
+	}
+}
+
+add_action( 'buddyforms_process_submission_end', 'buddyforms_pods_process_submission_end', 10, 1 );
+
+function buddyforms_acf_form_classes( $classes, $instance, $form_slug ) {
+	return 'pods-submittable ' . $classes;
+}
+
+add_filter( 'buddyforms_forms_classes', 'buddyforms_acf_form_classes', 99, 3 );
