@@ -3,7 +3,7 @@ Contributors: svenl77, gfirem, themekraft
 Tags: login form, login redirect, login page, custom login, login
 Requires at least: 4.9
 Tested up to: 5.3
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,11 @@ Create frontend forms for any Pods with moderation control and all the tools for
 Find all information under: https://themekraft.com/products/buddyforms-pods/
 
 == Changelog ==
+= 1.0.2 - 11 Feb 2020 =
+* Fixed the save issue.
+* Fixed the validation of the fields.
+* Added extra validation and code improvements.
+
 = 1.0.1 - 28 Jan 2020 =
 * Fixed the visibility of some Pods field.
 * Improved the Pods field validation.
