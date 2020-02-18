@@ -1,6 +1,6 @@
 === BuddyForms Pods ===
 Contributors: svenl77, gfirem, themekraft
-Tags: login form, login redirect, login page, custom login, login
+Tags: buddyforms, pods, buddyforms pods, pods with form
 Requires at least: 4.9
 Tested up to: 5.3
 Stable tag: 1.0.2
