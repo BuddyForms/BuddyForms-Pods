@@ -3,7 +3,7 @@ Contributors: svenl77, gfirem, themekraft
 Tags: buddyforms, pods, buddyforms pods, pods with form
 Requires at least: 4.9
 Tested up to: 5.3
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,11 @@ Create frontend forms for any Pods with moderation control and all the tools for
 Find all information under: https://themekraft.com/products/buddyforms-pods/
 
 == Changelog ==
+= 1.0.3 - 20 Feb 2020 =
+* Added requirement check for Pods and BuddyForms. 
+* Fixed a name collision with other BF add-on.
+* Code improved.
+
 = 1.0.2 - 11 Feb 2020 =
 * Fixed the save issue.
 * Fixed the validation of the fields.
