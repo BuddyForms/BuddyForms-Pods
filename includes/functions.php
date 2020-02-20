@@ -209,8 +209,8 @@ function buddyforms_pods_process_submission_end( $args ) {
 
 add_action( 'buddyforms_process_submission_end', 'buddyforms_pods_process_submission_end', 10, 1 );
 
-function buddyforms_acf_form_classes( $classes, $instance, $form_slug ) {
+function buddyforms_pods_form_classes( $classes, $instance, $form_slug ) {
 	return 'pods-submittable ' . $classes;
 }
 
-add_filter( 'buddyforms_forms_classes', 'buddyforms_acf_form_classes', 99, 3 );
+add_filter( 'buddyforms_forms_classes', 'buddyforms_pods_form_classes', 99, 3 );

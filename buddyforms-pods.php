@@ -103,15 +103,39 @@ class BuddyFormsPODS {
 	 * @since 1.0
 	 */
 	public function includes() {
-
-
-		if( ! defined( 'PODS_VERSION' )){
-			return;
+		if ( self::is_buddy_form_active() ) {
+			if ( defined( 'PODS_VERSION' ) ) {
+				require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'form-elements.php';
+				require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'bfPodsAPI.php';
+				require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'functions.php';
+			} else {
+				add_action( 'admin_notices', array( $this, 'need_pods' ) );
+			}
+		} else {
+			add_action( 'admin_notices', array( $this, 'need_buddyforms' ) );
 		}
+	}
 
-		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'form-elements.php';
-		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'bfPodsAPI.php';
-		require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'functions.php';
+	public static function load_plugins_dependency() {
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	}
+
+	public static function is_buddy_form_active() {
+		self::load_plugins_dependency();
+
+		return is_plugin_active( 'buddyforms-premium/BuddyForms.php' );
+	}
+
+	public function need_buddyforms() {
+		?>
+		<div class="notice notice-error"><p>Need <strong>BuddyForms Professional</strong> activated. Minimum version <i>2.5.10</i> required.</p></div>
+		<?php
+	}
+
+	public function need_pods() {
+		?>
+		<div class="notice notice-error"><p>Need <strong>Pods</strong> activated. Minimum version <i>2.7.16</i> required.</p></div>
+		<?php
 	}
 
 	/**

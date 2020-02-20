@@ -1,7 +1,7 @@
 function BuddyFormsPods() {
     return {
         init: function () {
-            if (BuddyFormsHooks && buddyformsGlobal) {
+            if (BuddyFormsHooks && buddyformsGlobal && jQuery(document).Pods) {
 
                 BuddyFormsHooks.addFilter('buddyforms:field:name', function (fieldName, [formSlug, fieldId, form]) {
                     if (fieldName && formSlug && buddyformsGlobal && buddyformsGlobal[formSlug] && buddyformsGlobal[formSlug].form_fields) {
@@ -12,6 +12,7 @@ function BuddyFormsPods() {
 
                     return fieldName;
                 }, 10);
+
                 BuddyFormsHooks.addAction('buddyforms:submit', function ([currentForm, event]) {
                     if ('object' == typeof tinymce) {
                         tinymce.triggerSave();
