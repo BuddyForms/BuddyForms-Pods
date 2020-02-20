@@ -27,7 +27,7 @@ Find all information under: https://themekraft.com/products/buddyforms-pods/
 
 == Changelog ==
 = 1.0.3 - 20 Feb 2020 =
-* Added requirement check for Pods and BuddyForms. 
+* Added requirement check for Pods and BuddyForms.
 * Fixed a name collision with other BF add-on.
 * Code improved.
 
