@@ -38,6 +38,12 @@ class BuddyFormsPODS {
 	public static $version = '1.0.3';
 	public static $include_assets = false;
 	public static $slug = 'buddyforms-pods';
+	/**
+	 * Instance of this class
+	 *
+	 * @var $instance BuddyFormsPODS
+	 */
+	protected static $instance = null;
 
 	/**
 	 * Initiate the class
@@ -46,8 +52,7 @@ class BuddyFormsPODS {
 	 * @since 0.1
 	 */
 	public function __construct() {
-
-		add_action( 'init', array( $this, 'includes' ), 4, 1 );
+		add_action( 'init', array( $this, 'includes' ) );
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
 		$this->load_constants();
 	}
@@ -127,15 +132,11 @@ class BuddyFormsPODS {
 	}
 
 	public function need_buddyforms() {
-		?>
-		<div class="notice notice-error"><p>Need <strong>BuddyForms Professional</strong> activated. Minimum version <i>2.5.10</i> required.</p></div>
-		<?php
+		BuddyFormsPODS::admin_notice( '<p>Need <strong>BuddyForms Professional</strong> activated. Minimum version <i>2.5.10</i> required.</p>' );
 	}
 
 	public function need_pods() {
-		?>
-		<div class="notice notice-error"><p>Need <strong>Pods</strong> activated. Minimum version <i>2.7.16</i> required.</p></div>
-		<?php
+		BuddyFormsPODS::admin_notice( '<p>Need <strong>Pods</strong> activated. Minimum version <i>2.7.16</i> required.</p>' );
 	}
 
 	/**
@@ -164,6 +165,65 @@ class BuddyFormsPODS {
 	 */
 	static function getSlug() {
 		return self::$slug;
+	}
+
+	public static function admin_notice( $html = '' ) {
+		if ( empty( $html ) ) {
+			$html = '<b>Oops...</b> BuddyForms Pods cannot run without <a target="_blank" href="https://themekraft.com/buddyforms/">BuddyForms</a>.';
+		}
+		?>
+		<style>
+			.buddyforms-notice label.buddyforms-title {
+				background: rgba(0, 0, 0, 0.3);
+				color: #fff;
+				padding: 2px 10px;
+				position: absolute;
+				top: 100%;
+				bottom: auto;
+				right: auto;
+				-moz-border-radius: 0 0 3px 3px;
+				-webkit-border-radius: 0 0 3px 3px;
+				border-radius: 0 0 3px 3px;
+				left: 10px;
+				font-size: 12px;
+				font-weight: bold;
+				cursor: auto;
+			}
+
+			.buddyforms-notice .buddyforms-notice-body {
+				margin: .5em 0;
+				padding: 2px;
+			}
+
+			.buddyforms-notice.buddyforms-title {
+				margin-bottom: 30px !important;
+			}
+
+			.buddyforms-notice {
+				position: relative;
+			}
+		</style>
+		<div class="error buddyforms-notice buddyforms-title">
+			<label class="buddyforms-title">BuddyForms Pods</label>
+			<div class="buddyforms-notice-body">
+				<?php echo $html; ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Return an instance of this class.
+	 *
+	 * @return object A single instance of this class.
+	 */
+	public static function get_instance() {
+		// If the single instance hasn't been set, set it now.
+		if ( null == self::$instance ) {
+			self::$instance = new self;
+		}
+
+		return self::$instance;
 	}
 }
 
@@ -235,44 +295,7 @@ function buddyforms_pods_fs_is_parent_active() {
 }
 
 function buddyforms_pods_need_buddyforms() {
-	?>
-	<style>
-		.buddyforms-notice label.buddyforms-title {
-			background: rgba(0, 0, 0, 0.3);
-			color: #fff;
-			padding: 2px 10px;
-			position: absolute;
-			top: 100%;
-			bottom: auto;
-			right: auto;
-			-moz-border-radius: 0 0 3px 3px;
-			-webkit-border-radius: 0 0 3px 3px;
-			border-radius: 0 0 3px 3px;
-			left: 10px;
-			font-size: 12px;
-			font-weight: bold;
-			cursor: auto;
-		}
-
-		.buddyforms-notice .buddyforms-notice-body {
-			margin: .5em 0;
-			padding: 2px;
-		}
-
-		.buddyforms-notice.buddyforms-title {
-			margin-bottom: 30px !important;
-		}
-		.buddyforms-notice {
-			position: relative;
-		}
-	</style>
-	<div class="error buddyforms-notice buddyforms-title">
-		<label class="buddyforms-title">BuddyForms Pods</label>
-		<div class="buddyforms-notice-body">
-			<b>Oops...</b> BuddyForms Pods cannot run without <a target="_blank" href="https://themekraft.com/buddyforms/">BuddyForms</a>.
-		</div>
-	</div>
-	<?php
+	BuddyFormsPODS::admin_notice();
 }
 
 function buddyforms_pods_fs_init() {
@@ -283,9 +306,9 @@ function buddyforms_pods_fs_init() {
 		// Signal that the add-on's SDK was initiated.
 		do_action( 'buddyforms_pods_fs_loaded' );
 
-		$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
+		$GLOBALS['BuddyFormsPODS'] = BuddyFormsPODS::get_instance();
 	} else {
-		add_action( 'admin_notices', 'buddyforms_pods_need_buddyforms');
+		add_action( 'admin_notices', 'buddyforms_pods_need_buddyforms' );
 	}
 }
 
