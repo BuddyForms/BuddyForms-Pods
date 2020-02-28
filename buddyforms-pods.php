@@ -243,25 +243,29 @@ function buddyforms_pods_freemius() {
 
 		try {
 			$buddyforms_pods_fs = fs_dynamic_init( array(
-				'id'               => '4706',
-				'slug'             => 'bf-pods',
-				'type'             => 'plugin',
-				'public_key'       => 'pk_5ffd22ecf0de8130b49fc380bf260',
-				'is_premium'       => true,
-				'is_premium_only'  => true,
-				'has_paid_plans'   => true,
-				'is_org_compliant' => false,
-				'parent'           => array(
-					'id'         => '391',
-					'slug'       => 'buddyforms',
-					'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
-					'name'       => 'BuddyForms',
-				),
-				'menu'             => array(
-					'first-path' => 'plugins.php',
-					'support'    => false,
-				)
-			) );
+                'id'                  => '4706',
+                'slug'                => 'bf-pods',
+                'type'                => 'plugin',
+                'public_key'          => 'pk_5ffd22ecf0de8130b49fc380bf260',
+                'is_premium'          => true,
+                'is_premium_only'     => true,
+                'has_paid_plans'      => true,
+                'is_org_compliant'    => false,
+                'trial'               => array(
+                    'days'               => 14,
+                    'is_require_payment' => true,
+                ),
+                'parent'              => array(
+                    'id'         => '391',
+                    'slug'       => 'buddyforms',
+                    'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
+                    'name'       => 'BuddyForms',
+                ),
+                'menu'                => array(
+                    'first-path'     => 'plugins.php',
+                    'support'        => false,
+                ),
+            ) );
 		} catch ( Freemius_Exception $e ) {
 			return false;
 		}
