@@ -211,6 +211,10 @@ function buddyforms_pods_formbuilder_fields_options( $form_fields, $field_type, 
 		return $form_fields;
 	}
 
+	if ( ! isset( $buddyforms[ $form_slug ] ) ) {
+		return $form_fields;
+	}
+
 	$post_type = $buddyforms[ $form_slug ]['post_type'];
 
 	$pods = pods_api()->load_pods( array( 'fields' => false ) );

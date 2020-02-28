@@ -167,50 +167,47 @@ class BuddyFormsPODS {
 	}
 }
 
+// Create a helper function for easy SDK access.
+function buddyforms_pods_freemius() {
+	global $buddyforms_pods_fs;
 
-if ( ! function_exists( 'buddyforms_pods_fs' ) ) {
-	// Create a helper function for easy SDK access.
-	function buddyforms_pods_fs() {
-		global $buddyforms_pods_fs;
-
-		if ( ! isset( $buddyforms_pods_fs ) ) {
-			// Include Freemius SDK.
-			if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php' ) ) {
-				// Try to load SDK from parent plugin folder.
-				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php';
-			} elseif ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php' ) ) {
-				// Try to load SDK from premium parent plugin folder.
-				require_once dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php';
-			}
-
-			try {
-				$buddyforms_pods_fs = fs_dynamic_init( array(
-					'id'               => '4706',
-					'slug'             => 'bf-pods',
-					'type'             => 'plugin',
-					'public_key'       => 'pk_5ffd22ecf0de8130b49fc380bf260',
-					'is_premium'       => true,
-					'is_premium_only'  => true,
-					'has_paid_plans'   => true,
-					'is_org_compliant' => false,
-					'parent'           => array(
-						'id'         => '391',
-						'slug'       => 'buddyforms',
-						'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
-						'name'       => 'BuddyForms',
-					),
-					'menu'             => array(
-						'first-path' => 'plugins.php',
-						'support'    => false,
-					)
-				) );
-			} catch ( Freemius_Exception $e ) {
-				return false;
-			}
+	if ( ! isset( $buddyforms_pods_fs ) ) {
+		// Include Freemius SDK.
+		if ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php' ) ) {
+			// Try to load SDK from parent plugin folder.
+			require_once dirname( dirname( __FILE__ ) ) . '/buddyforms/includes/resources/freemius/start.php';
+		} elseif ( file_exists( dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php' ) ) {
+			// Try to load SDK from premium parent plugin folder.
+			require_once dirname( dirname( __FILE__ ) ) . '/buddyforms-premium/includes/resources/freemius/start.php';
 		}
 
-		return $buddyforms_pods_fs;
+		try {
+			$buddyforms_pods_fs = fs_dynamic_init( array(
+				'id'               => '4706',
+				'slug'             => 'bf-pods',
+				'type'             => 'plugin',
+				'public_key'       => 'pk_5ffd22ecf0de8130b49fc380bf260',
+				'is_premium'       => true,
+				'is_premium_only'  => true,
+				'has_paid_plans'   => true,
+				'is_org_compliant' => false,
+				'parent'           => array(
+					'id'         => '391',
+					'slug'       => 'buddyforms',
+					'public_key' => 'pk_dea3d8c1c831caf06cfea10c7114c',
+					'name'       => 'BuddyForms',
+				),
+				'menu'             => array(
+					'first-path' => 'plugins.php',
+					'support'    => false,
+				)
+			) );
+		} catch ( Freemius_Exception $e ) {
+			return false;
+		}
 	}
+
+	return $buddyforms_pods_fs;
 }
 
 function buddyforms_pods_fs_is_parent_active_and_loaded() {
@@ -237,18 +234,58 @@ function buddyforms_pods_fs_is_parent_active() {
 	return false;
 }
 
+function buddyforms_pods_need_buddyforms() {
+	?>
+	<style>
+		.buddyforms-notice label.buddyforms-title {
+			background: rgba(0, 0, 0, 0.3);
+			color: #fff;
+			padding: 2px 10px;
+			position: absolute;
+			top: 100%;
+			bottom: auto;
+			right: auto;
+			-moz-border-radius: 0 0 3px 3px;
+			-webkit-border-radius: 0 0 3px 3px;
+			border-radius: 0 0 3px 3px;
+			left: 10px;
+			font-size: 12px;
+			font-weight: bold;
+			cursor: auto;
+		}
+
+		.buddyforms-notice .buddyforms-notice-body {
+			margin: .5em 0;
+			padding: 2px;
+		}
+
+		.buddyforms-notice.buddyforms-title {
+			margin-bottom: 30px !important;
+		}
+		.buddyforms-notice {
+			position: relative;
+		}
+	</style>
+	<div class="error buddyforms-notice buddyforms-title">
+		<label class="buddyforms-title">BuddyForms Pods</label>
+		<div class="buddyforms-notice-body">
+			<b>Oops...</b> BuddyForms Pods cannot run without <a target="_blank" href="https://themekraft.com/buddyforms/">BuddyForms</a>.
+		</div>
+	</div>
+	<?php
+}
+
 function buddyforms_pods_fs_init() {
 	if ( buddyforms_pods_fs_is_parent_active_and_loaded() ) {
 		// Init Freemius.
-		buddyforms_pods_fs();
-
+		buddyforms_pods_freemius();
 
 		// Signal that the add-on's SDK was initiated.
 		do_action( 'buddyforms_pods_fs_loaded' );
 
 		$GLOBALS['BuddyFormsPODS'] = new BuddyFormsPODS();
-
-
+	} else {
+		add_action( 'admin_notices', 'buddyforms_pods_need_buddyforms');
 	}
 }
 
