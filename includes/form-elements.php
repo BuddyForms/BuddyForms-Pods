@@ -16,7 +16,7 @@ function buddyforms_pods_elements_to_select( $elements_select_options ) {
 	}
 
 	$elements_select_options['pods']['label']                = 'PODS';
-	$elements_select_options['pods']['class']                = 'bf_show_if_f_type_post';
+	$elements_select_options['pods']['class']                = 'bf_show_if_f_type_all';
 	$elements_select_options['pods']['fields']['pods-field'] = array(
 		'label' => __( 'PODS Field', 'buddyforms' ),
 	);
