@@ -3,9 +3,11 @@
 /*
  * Add PODS form elementrs in the form elements select box
  */
+
 add_filter( 'buddyforms_add_form_element_select_option', 'buddyforms_pods_elements_to_select', 1, 2 );
 function buddyforms_pods_elements_to_select( $elements_select_options ) {
 	global $post;
+
 
 	if ( $post->post_type != 'buddyforms' ) {
 		return $elements_select_options;
@@ -54,35 +56,54 @@ function buddyforms_pods_form_builder_form_elements( $form_fields, $form_slug, $
 		case 'pods-field':
 
 			unset( $form_fields );
-
-			$pods_group = 'false';
+			reset($pods_list);
+			$pods_group = key($pods_list);//get the first element by default;
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_group'] ) ) {
 				$pods_group = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_group'];
 			}
 
+
 			$form_fields['general']['pods_group'] = new Element_Select( '', "buddyforms_options[form_fields][" . $field_id . "][pods_group]", $pods_list, array(
 				'value'         => $pods_group,
 				'class'         => 'bf_pods_field_group_select',
-				'data-field_id' => $field_id
+				'data-field_id' => $field_id,
+				'onchange'		=>"populate_pod_fields(this,'".$form_slug."','".$field_id."')"
 			) );
 
-			$pods_field = 'not-set';
+			$pods_field = false;
+			$field_select                         = $pod_form_fields[ $pods_group ];
 			if ( isset( $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'] ) ) {
 				$pods_field = $buddyforms[ $form_slug ]['form_fields'][ $field_id ]['pods_field'];
 			}
-			$field_select                         = $pod_form_fields[ $pods_group ];
+			else{
+				reset($field_select);
+				$pods_field = key($field_select);//get the first element by default;
+			}
+
 			$form_fields['general']['pods_field'] = new Element_Select( '', "buddyforms_options[form_fields][" . $field_id . "][pods_field]", $field_select, array(
 				'value' => $pods_field,
-				'class' => 'bf_pods_fields_select bf_pods_' . $field_id
+				'class' => 'bf_pods_fields_select bf_pods_' . $field_id,
+				'data-pods-field-id' => $field_id,
+				'onchange'		=>"change_slug_and_name(this,'".$form_slug."','".$field_id."')"
 			) );
 
 			$name = 'PODS-Field';
 			if ( $pods_field != 'not-set' ) {
 				$name = 'PODS Field: ' . $pods_field;
 			}
-			$form_fields['general']['name'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][name]", $name );
+			$form_fields['general']['name'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][name]", $name ,array(
+				'data'     => $field_id,
+				'value'    => $name,
+				'data-pods-field-name' => $field_id,
+			));
+			$form_fields['general']['slug'] = new Element_Hidden(  "buddyforms_options[form_fields][" . $field_id . "][slug]",$pods_field, array(
 
-			$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", $pods_field );
+				'data'     => $field_id,
+				'value'    => $pods_field,
+				'data-pods-field-slug' => $field_id,
+			) );
+
+			//$form_fields['general']['slug']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][slug]", $pods_field );
 			$form_fields['general']['type']  = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][type]", $field_type );
 			$form_fields['general']['order'] = new Element_Hidden( "buddyforms_options[form_fields][" . $field_id . "][order]", $field_position, array( 'id' => 'buddyforms/' . $form_slug . '/form_fields/' . $field_id . '/order' ) );
 			break;
@@ -150,7 +171,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 
 	$pods_initial_script = "<script type=\"text/javascript\">if ('undefined' === typeof pods_form_init) {var pods_form_init = true;  document.addEventListener('DOMContentLoaded', function () { if ('undefined' !== typeof jQuery(document).Pods) { if ('undefined' === typeof ajaxurl) {  window.ajaxurl = '" . pods_slash( admin_url( 'admin-ajax.php' ) ) . "';  jQuery(document).Pods('dependency', true); } } }, false); }</script>";
 
-	$form->addElement( new Element_HTML( $pods_initial_script ) );
+	//$form->addElement( new Element_HTML( $pods_initial_script ) );
 
 	switch ( $customfield['type'] ) {
 		case 'pods-field':
@@ -165,7 +186,21 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 
 			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
 
-			$output_field = $mypod->form( $params );
+
+			$output_field = $mypod->form( $params,"" );
+			$output_field = str_replace(array( "\r", "\n", "\t"), '', $output_field);
+			$labels_layout = isset( $buddyforms[ $form_slug ]['layout']['labels_layout'] ) ? $buddyforms[ $form_slug ]['layout']['labels_layout'] : 'inline';
+			if ( $labels_layout == 'inline' ) {
+				$lbl =$mypod->fields[$customfield['pods_field']]['label'];
+				$field_slug = str_replace('_','-',$customfield['pods_field']);
+				$search       = sprintf( '<label class="pods-form-ui-label pods-form-ui-label-%s" for="pods-form-ui-%s">%s</label>', $field_slug,$field_slug,$lbl );
+				//Remove Label
+				$output_field = str_replace( $search, '', $output_field );
+				//add placeholder
+				$search =sprintf( '<input name="%s"', $customfield['pods_field'] );
+				$placeholder = sprintf( '<input name="%s" placeholder="%s"', $customfield['pods_field'] ,$lbl);
+				//$output_field = str_replace( $search, $placeholder, $output_field );
+			}
 			//Add wrapper class
 			$output_field = str_replace( '<ul class="pods-form-fields', '<ul class="pods-form-fields bf_field_group ', $output_field );
 			$search       = sprintf( 'name="%s"', $field['name'] );
