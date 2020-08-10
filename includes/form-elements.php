@@ -179,13 +179,19 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 			if ( empty( $pod_target ) ) {
 				return $form;
 			}
-			$mypod = pods( $pod_target, $post_id );
+			if(is_user_logged_in()){
+				$user_id = get_current_user_id();
+				$mypod = pods( $pod_target )->find(array("where" =>"t.ID = ".$user_id));
+
+			}else{
+				$mypod = pods( $pod_target, $post_id );
+			}
+
 			if ( ! count( $mypod->pod_data['fields'] ) > 0 ) {
 				break;
 			}
 
 			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
-
 
 			$output_field = $mypod->form( $params,"" );
 			$output_field = str_replace(array( "\r", "\n", "\t"), '', $output_field);
