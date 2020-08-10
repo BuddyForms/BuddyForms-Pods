@@ -9,7 +9,12 @@ function buddyforms_pods_include_assets() {
 }
 
 add_action( 'buddyforms_front_js_css_after_enqueue', 'buddyforms_pods_include_assets' );
+add_action( 'admin_enqueue_scripts', 'builder_pods_include_assets' , 102, 1 );
+function builder_pods_include_assets($hook_suffix) {
+	wp_register_script( 'buddyforms_builder_pods_js', BUDDYFORMS_PODS_ASSETS_URL . 'js/bf-pods-builder.js', array( 'jquery'), BuddyFormsPODS::getVersion() );
+	wp_enqueue_script( 'buddyforms_builder_pods_js' );
 
+}
 /**
  * Include the pods field into JS options
  *
@@ -43,8 +48,18 @@ function add_pods_field_to_global( $buddyforms_global_js_data, $form_slug ) {
 			$buddyforms_global_js_data[ $form_slug ]['form_fields'] = $new_fields;
 		}
 
-	}
+		$pods            = pods_api()->load_pods( array( 'fields' => false ) );
+		$pod_form_fields = array();
+		$pods_list       = array();
+		foreach ( $pods as $pod_key => $pod ) {
+			$pods_list[ $pod['name'] ] = $pod['label'];
+			foreach ( $pod['fields'] as $pod_fields_key => $field ) {
+				$pod_form_fields[ $pod['name'] ][ $field['name'] ] = $field['label'];
+			}
+		}
+		$buddyforms_global_js_data[ $form_slug ]['pod_form_fields'] = $pod_form_fields;
 
+	}
 	return $buddyforms_global_js_data;
 }
 
