@@ -2,7 +2,11 @@
   "name": "themekraft/buddyforms-pods",
   "description": "Use BuddyForms with Pods",
   "type": "wordpress-plugin",
-  "keywords": ["frontend table", "buddyforms", "datatable"],
+  "keywords": [
+    "frontend table",
+    "buddyforms",
+    "datatable"
+  ],
   "homepage": "https://github.com/BuddyForms/buddyforms-frontend-table/",
   "license": "GPL-2.0+",
   "authors": [
@@ -16,16 +20,22 @@
     }
   ],
   "minimum-stability": "stable",
-  "require": {
-    "php": ">=5.2"
-  },
   "require-dev": {
-    "bruli/php-git-hooks": "^5.1"
+    "consolidation/robo": "^1.0.0",
+    "bamarni/composer-bin-plugin": "dev-master"
   },
   "scripts": {
-    "package": "sh .tk/package.sh buddyforms-pods",
-    "wp-release": "sh .tk/wp_release.sh",
-    "beta-release": "sh .tk/full-deploy.sh buddyforms-pods 4706 false beta",
-    "full-release": "sh .tk/full-deploy.sh buddyforms-pods 4706 false released"
+    "bin": "echo 'bin not installed'",
+    "post-install-cmd": [
+      "@composer bin all install --ansi"
+    ],
+    "post-update-cmd": [
+      "@composer bin all update --ansi"
+    ]
+  },
+  "extra": {
+    "bamarni-bin": {
+      "target-directory": "vendor-scope"
+    }
   }
 }
