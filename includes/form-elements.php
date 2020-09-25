@@ -194,25 +194,44 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
 
 			$output_field = $mypod->form( $params,"" );
-			$output_field = str_replace(array( "\r", "\n", "\t"), '', $output_field);
+			//$output_field = str_replace(array( "\r", "\n", "\t"), '', $output_field);
+			//Remove ul
+			$output_field = str_replace( '<ul class="pods-form-fields pods-dependency">', '', $output_field );
+			$output_field = str_replace( '</ul>', '', $output_field );
+			//Remove il
+			$output_field = str_replace( '<li class="pods-field', '<div class=" ', $output_field );
+			$output_field = str_replace( '</li>', '</div>', $output_field );
+
+
+			//add bf-input class
+			$output_field = str_replace( 'class="pods-field-input"', 'class="pods-field-input bf-input"', $output_field );
+			//add form-control class
+			if(strpos($output_field,'"class":"pods-form-ui-field')){
+				//Check if the pods field add the class using json format
+				$output_field = str_replace( '"class":"pods-form-ui-field', '"class":"pods-form-ui-field form-control ', $output_field );
+			}
+			else{
+				$output_field = str_replace( 'class="pods-form-ui-field', 'class="pods-form-ui-field form-control ', $output_field );
+				$output_field = str_replace( 'class="regular-text', 'class="regular-text form-control ', $output_field );
+
+			}
+
 			$labels_layout = isset( $buddyforms[ $form_slug ]['layout']['labels_layout'] ) ? $buddyforms[ $form_slug ]['layout']['labels_layout'] : 'inline';
 			if ( $labels_layout == 'inline' ) {
 				$lbl =$mypod->fields[$customfield['pods_field']]['label'];
 				$field_slug = str_replace('_','-',$customfield['pods_field']);
-				$search       = sprintf( '<label class="pods-form-ui-label pods-form-ui-label-%s" for="pods-form-ui-%s">%s</label>', $field_slug,$field_slug,$lbl );
+				$search       = sprintf( '<label class="pods-form-ui-label pods-form-ui-label-%s" for="pods-form-ui-%s">%s</label>', $field_slug,$field_slug,"\n\t".$lbl );
 				//Remove Label
 				$output_field = str_replace( $search, '', $output_field );
-				//add placeholder
-				$search =sprintf( '<input name="%s"', $customfield['pods_field'] );
-				$placeholder = sprintf( '<input name="%s" placeholder="%s"', $customfield['pods_field'] ,$lbl);
-				//$output_field = str_replace( $search, $placeholder, $output_field );
+				
 			}
 			//Add wrapper class
 			$output_field = str_replace( '<ul class="pods-form-fields', '<ul class="pods-form-fields bf_field_group ', $output_field );
 			$search       = sprintf( 'name="%s"', $field['name'] );
 			//Add attribute data-form
 			$output_field = str_replace( $search, $search . sprintf( ' data-form="%s" data-pod-target="%s"', $form_slug, $pod_target ), $output_field );
-			$form->addElement( new Element_HTML( $output_field ) );
+
+			$form->addElement( new Element_HTML( '<div class="bf_field_group">'. $output_field.'</div>' ) );
 			break;
 		case 'pods-group':
 			$pod_target = $customfield['pods_group'];
