@@ -191,9 +191,24 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 				break;
 			}
 
-			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field'] );
-
+			$custom_val = get_post_meta($post_id,$customfield['pods_field'],true);
+			$params = array( 'fields_only' => true, 'fields' => $customfield['pods_field']  );
 			$output_field = $mypod->form( $params,"" );
+            $json_info = get_string_between($output_field,'<script type="application/json" class="pods-dfv-field-data">','</script>');
+            if($json_info){
+				$json_format = json_decode($json_info);
+				if($json_format->fieldType && $json_format->fieldType=='pick'){
+					foreach ($json_format->fieldItemData as $index=>$value){
+						if($value->id==$custom_val){
+							$value->selected = true;
+							$decode_json = json_encode($json_format);
+							$output_field = str_replace( $json_info, $decode_json, $output_field );
+							break;
+						}
+					}
+				}
+			}
+
 			//$output_field = str_replace(array( "\r", "\n", "\t"), '', $output_field);
 			//Remove ul
 			$output_field = str_replace( '<ul class="pods-form-fields pods-dependency">', '', $output_field );
@@ -223,7 +238,7 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 				$search       = sprintf( '<label class="pods-form-ui-label pods-form-ui-label-%s" for="pods-form-ui-%s">%s</label>', $field_slug,$field_slug,"\n\t".$lbl );
 				//Remove Label
 				$output_field = str_replace( $search, '', $output_field );
-				
+
 			}
 			//Add wrapper class
 			$output_field = str_replace( '<ul class="pods-form-fields', '<ul class="pods-form-fields bf_field_group ', $output_field );
@@ -257,6 +272,14 @@ function buddyforms_pods_frontend_form_elements( $form, $form_args ) {
 	}
 
 	return $form;
+}
+function get_string_between($string, $start, $end){
+	$string = ' ' . $string;
+	$ini = strpos($string, $start);
+	if ($ini == 0) return '';
+	$ini += strlen($start);
+	$len = strpos($string, $end, $ini) - $ini;
+	return substr($string, $ini, $len);
 }
 
 add_filter( 'buddyforms_formbuilder_fields_options', 'buddyforms_pods_formbuilder_fields_options', 999, 4 );
