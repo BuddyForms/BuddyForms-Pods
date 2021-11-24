@@ -2,8 +2,8 @@
 Contributors: svenl77, gfirem, themekraft
 Tags: buddyforms, pods, buddyforms pods, pods with form
 Requires at least: 4.9
-Tested up to: 5.3
-Stable tag: 1.0.5
+Tested up to: 5.8
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,6 +26,11 @@ Create frontend forms for any Pods with moderation control and all the tools for
 Find all information under: https://themekraft.com/products/buddyforms-pods/
 
 == Changelog ==
+= 1.0.6 - 23 Nov 2021 =
+* Fixed issue with Pods fields validation.
+* Fixed error with fields values from same post id.
+* Tested up to WordPress 5.8
+
 = 1.0.5 - 21 Aug 2020 =
 * Fixed pods field not showing on form type registration.
 * Fixed layout and Visualization issues were solved for the pods fields.

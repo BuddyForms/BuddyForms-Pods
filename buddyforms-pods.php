@@ -4,7 +4,7 @@
  * Plugin Name: BuddyForms Pods
  * Plugin URI: https://themekraft.com/products/buddyforms-pods/
  * Description: Use BuddyForms with Pods
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: ThemeKraft
  * Author URI: https://themekraft.com/
  * License: GPLv2 or later
@@ -35,7 +35,7 @@ class BuddyFormsPODS {
 	/**
 	 * @var string
 	 */
-	public static $version = '1.0.5';
+	public static $version = '1.0.6';
 	public static $include_assets = false;
 	public static $slug = 'buddyforms-pods';
 	/**
