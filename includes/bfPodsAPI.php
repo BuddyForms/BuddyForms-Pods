@@ -53,8 +53,16 @@ class bfPodsAPI extends PodsAPI {
 		return pods_do_hook( "api", $name, $args, $this );
 	}
 
-	public function handle_field_validation( &$value, $field, $object_fields, $fields, $pod, $params ) {
+	public function handle_field_validation( &$value, $field, $object_fields, $fields, $pod, $params = array() ) {
 		$tableless_field_types = PodsForm::tableless_field_types();
+
+		if ( ! is_array( $fields ) ){
+			$fields = array();
+		}
+
+		if ( ! is_array( $object_fields ) ){
+			$object_fields = array();
+		}
 
 		$fields = array_merge( $fields, $object_fields );
 
@@ -134,8 +142,9 @@ class bfPodsAPI extends PodsAPI {
 				// @todo handle tableless check
 			}
 		}
-
-		$validate = PodsForm::validate( $options['type'], $value, $field, array_merge( $options, pods_var( 'options', $options, array() ) ), $fields, $pod, $id, $params );
+		
+		$options_as_array = json_decode( json_encode( $options ), true );
+		$validate = PodsForm::validate( $options['type'], $value, $field, array_merge( $options_as_array, pods_var( 'options', $options, array() ) ), $fields, $pod, $id, $params );
 
 		$validate = $this->do_hook( 'field_validation', $validate, $value, $field, $object_fields, $fields, $pod, $params );
 
