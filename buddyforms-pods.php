@@ -108,7 +108,7 @@ class BuddyFormsPODS {
 	 * @since 1.0
 	 */
 	public function includes() {
-		if ( self::is_buddy_form_active() ) {
+		if ( buddyforms_pods_fs_is_parent_active() ) {
 			if ( defined( 'PODS_VERSION' ) ) {
 				require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'form-elements.php';
 				require_once BUDDYFORMS_PODS_INCLUDES_PATH . 'bfPodsAPI.php';
@@ -289,8 +289,8 @@ function buddyforms_pods_fs_is_parent_active() {
 	}
 
 	foreach ( $active_plugins as $basename ) {
-		if ( 0 === strpos( $basename, 'buddyforms/' ) ||
-		     0 === strpos( $basename, 'buddyforms-premium/' )
+		if ( 0 === strpos( strtolower( $basename ), 'buddyforms/' ) ||
+		     0 === strpos( strtolower( $basename ), 'buddyforms-premium/' )
 		) {
 			return true;
 		}
