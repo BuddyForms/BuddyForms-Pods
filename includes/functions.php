@@ -26,6 +26,9 @@ function builder_pods_include_assets($hook_suffix) {
 function add_pods_field_to_global( $buddyforms_global_js_data, $form_slug ) {
 	if ( ! empty( $form_slug ) && ! empty( $buddyforms_global_js_data[ $form_slug ] ) && ! empty( $buddyforms_global_js_data[ $form_slug ]['form_fields'] ) ) {
 		$new_fields = array();
+		if( ! isset( $form_slug['form_fields'] ) ){
+			return $buddyforms_global_js_data;
+		}
 		foreach ( $buddyforms_global_js_data[ $form_slug ]['form_fields'] as $field_id => $field ) {
 			if ( $field['type'] === 'pods-group' ) {
 				if ( ! empty( $field['pods_group'] ) ) {
@@ -173,7 +176,14 @@ function buddyforms_pods_update_post_meta( $customfield, $post_id ) {
 			$pod = pods( $customfield['pods_group'], $post_id );
 			foreach ( $pod_form_fields[ $customfield['pods_group'] ] as $kk => $field_name ) {
 				if ( isset( $_POST[ $field_name ] ) ) {
-					$data[ $field_name ] = sanitize_text_field( $_POST[ $field_name ] );
+					if( is_array( $_POST[ $field_name ] ) ){
+						$data[ $field_name ] = array();
+						foreach( $_POST[ $field_name ] as $key => $value ){
+							$data[ $field_name ][ $key ] = $value;
+						}
+					} else {
+						$data[ $field_name ] = sanitize_text_field( $_POST[ $field_name ] );
+					}
 				}
 			}
 
