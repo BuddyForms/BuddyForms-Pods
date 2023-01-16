@@ -2,8 +2,8 @@
 Contributors: svenl77, gfirem, themekraft
 Tags: buddyforms, pods, buddyforms pods, pods with form
 Requires at least: 4.9
-Tested up to: 6.1
-Stable tag: 1.0.7
+Tested up to: 6.1.1
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,9 +26,14 @@ Create frontend forms for any Pods with moderation control and all the tools for
 Find all information under: https://themekraft.com/products/buddyforms-pods/
 
 == Changelog ==
+= 1.0.8 - 15 Jan 2023 =
+* Updated duration of trial version.
+* Added bundle license auto activation.
+* Tested up to WordPress 6.1.1
+
 = 1.0.7 - 10 Nov 2022 =
 * Fixed issue with saving field data.
-* Fixed issue with missing JS scripts
+* Fixed issue with missing JS scripts.
 * Tested up to WordPress 6.1 
 
 = 1.0.6 - 23 Nov 2021 =

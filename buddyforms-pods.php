@@ -4,7 +4,7 @@
  * Plugin Name: BuddyForms Pods
  * Plugin URI: https://themekraft.com/products/buddyforms-pods/
  * Description: Use BuddyForms with Pods
- * Version: 1.0.7
+ * Version: 1.0.8
  * Author: ThemeKraft
  * Author URI: https://themekraft.com/
  * License: GPLv2 or later
@@ -35,7 +35,7 @@ class BuddyFormsPODS {
 	/**
 	 * @var string
 	 */
-	public static $version = '1.0.7';
+	public static $version = '1.0.8';
 	public static $include_assets = false;
 	public static $slug = 'buddyforms-pods';
 	/**
@@ -253,7 +253,7 @@ function buddyforms_pods_freemius() {
                 'has_paid_plans'      => true,
                 'is_org_compliant'    => false,
                 'trial'               => array(
-                    'days'               => 14,
+                    'days'               => 7,
                     'is_require_payment' => true,
                 ),
                 'parent'              => array(
@@ -266,6 +266,7 @@ function buddyforms_pods_freemius() {
                     'first-path'     => 'plugins.php',
                     'support'        => false,
                 ),
+				'bundle_license_auto_activation' => true,
             ) );
 		} catch ( Freemius_Exception $e ) {
 			return false;
